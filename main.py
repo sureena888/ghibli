@@ -10,37 +10,25 @@ jinja_env = jinja2.Environment(
     extensions=['jinja2.ext.autoescape'],
     autoescape=True)
 
-# the handler section
-#class MainPage(webapp2.RequestHandler):
-    #def get(self):
-        #welcome_template = jinja_env.get_template('templates/welcome.html')
-        #self.response.write(welcome_template.render())  # the response
-
 class MainPageHandler(webapp2.RequestHandler):
     def get(self):
-        form_template = jinja_env.get_template('templates/main.html')
-        self.response.write(form_template.render())  # the response
-# class RecipeDisplayHandler(webapp2.RequestHandler):
-#     def post(self):
-#         query=self.request.get('query')
-#         base_url = 'http://www.recipepuppy.com/api/?'
-#         params = { 'q': query }
-#         response = urlfetch.fetch(base_url + urlencode(params)).content
-#         results = json.loads(response)
-#         # bottom=self.request.get('bottom')
-#         # memetype=self.request.get('memetype')
-#         result_template = jinja_env.get_template('templates/recipe.html')
-#         self.response.write(result_template.render({
-#             'results': results
-#             # 'query': query
-#             # 'bottom': bottom,
-#             # 'image_file': memetype
-#
-#         }))
+        template = jinja_env.get_template('templates/main.html')
+        self.response.write(template.render())
 
-# the app configuration section
+class SearchHandler(webapp2.RequestHandler):
+    def post(self):
+        filter = self.request.get('filter')
+        base_url = 'https://ghibliapi.herokuapp.com/films'.format(filter) # JUST FOR NOW
+        response = json.loads(urlfetch.fetch(base_url).content)
+        template = jinja_env.get_template('templates/results.html')
+        self.response.write(template.render({ 'response': response}))
+        # params = {
+        #     'q': self.request.get('query'),
+        #     'i': self.request.get('ingredients')}
+        # response = json.loads(urlfetch.fetch(base_url + urlencode(params)).content)
+
+
 app = webapp2.WSGIApplication([
-    #('/', MainPage), #this maps the root url to the Main Page Handler
     ('/', MainPageHandler),
-    # ('/recipe', RecipeDisplayHandler)
+    ('/search', SearchHandler),
 ], debug=True)
